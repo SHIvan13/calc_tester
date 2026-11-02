@@ -1,0 +1,54 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
+class PercentCalculatorPage:
+    URL = "https://www.calculator.net/percent-calculator.html"
+
+    # Локаторы собраны в одном месте как константы класса
+    PERCENT_INPUT = (By.ID, "cpar1")
+    OF_INPUT = (By.ID, "cpar2")
+    CALCULATE_BUTTON = (By.XPATH, "//input[@value='Calculate']")
+    RESET_BUTTON = (By.XPATH, "//input[@value='Clear']")
+    RESULT = (By.CSS_SELECTOR, "p.verybigtext b")
+    ERROR_MSG = (By.CSS_SELECTOR, "font[color='red']")
+
+    def __init__(self, driver):
+        self.driver = driver
+        self.wait = WebDriverWait(driver, 10)
+
+    def open(self):
+        self.driver.get(self.URL)
+        return self
+
+    def enter_percent(self, value):
+        field = self.wait.until(EC.visibility_of_element_located(self.PERCENT_INPUT))
+        field.clear()
+        field.send_keys(str(value))
+        return self
+
+    def enter_of(self, value):
+        field = self.wait.until(EC.visibility_of_element_located(self.OF_INPUT))
+        field.clear()
+        field.send_keys(str(value))
+        return self
+
+    def click_calculate(self):
+        self.wait.until(EC.element_to_be_clickable(self.CALCULATE_BUTTON)).click()
+        return self
+
+    def click_reset(self):
+        self.wait.until(EC.element_to_be_clickable(self.RESET_BUTTON)).click()
+        return self
+
+    def get_result(self) -> str:
+        el = self.wait.until(EC.visibility_of_element_located(self.RESULT))
+        return el.text.strip()
+
+    def get_percent_value(self) -> str:
+        return self.driver.find_element(*self.PERCENT_INPUT).get_attribute("value")
+
+    def get_error_text(self) -> str:
+        el = self.wait.until(EC.visibility_of_element_located(self.ERROR_MSG))
+        return el.text.strip()
